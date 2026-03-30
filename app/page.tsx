@@ -121,7 +121,7 @@ function PasswordAnalyzer() {
           `パスワードは${PASSWORD_LENGTH}文字で入力してください。（現在: ${trimmed.length}文字）`
         );
       } else {
-        setError("パスワードに使用できない文字が含まれています。ひらがな（ぁ〜む）を入力してください。");
+        setError("パスワードに使用できない文字が含まれています。ひらがな（ぁ〜む）またはカタカナ（ァ〜ム）を入力してください。");
       }
       setResult(null);
       return;
@@ -142,7 +142,7 @@ function PasswordAnalyzer() {
     <div className="space-y-6">
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-1">
-          パスワード入力 <span className="text-gray-400 font-normal">（{PASSWORD_LENGTH}文字のひらがな）</span>
+          パスワード入力 <span className="text-gray-400 font-normal">（{PASSWORD_LENGTH}文字のひらがな／カタカナ）</span>
         </label>
         <div className="flex gap-2">
           <input

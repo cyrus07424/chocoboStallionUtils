@@ -110,9 +110,15 @@ export const PASSWORD_LENGTH = 34;
  * ぁあぃいぅうぇえぉお かがきぎくぐけげこご
  * さざしじすずせぜそぞ ただちぢっつづてでとど
  * なにぬねのはばぱひびぴ ふぶぷへべぺほぼぽまみむ
+ *
+ * Katakana equivalents (ァ–ム, U+30A1–U+30E0) are also accepted and treated
+ * as identical to their hiragana counterparts (offset 0x60).
  */
 const CHAR_TABLE_START = 0x3041; // ぁ
 const CHAR_TABLE_END = 0x3080;   // む
+
+/** Unicode offset from hiragana to the corresponding katakana character. */
+const KATAKANA_OFFSET = 0x60;
 
 export const CHAR_TABLE: string = Array.from(
   { length: CHAR_TABLE_END - CHAR_TABLE_START + 1 },
@@ -151,12 +157,17 @@ export const BODY_SIZES: BodySize[] = ["普通", "大", "小"];
 
 /**
  * Convert a password string to an array of 204 bits (each 0 or 1).
- * Returns null if the password contains invalid characters.
+ * Accepts both hiragana (ぁ–む, U+3041–U+3080) and their katakana equivalents
+ * (ァ–ム, U+30A1–U+30E0). Returns null if the password contains invalid characters.
  */
 function passwordToBits(password: string): number[] | null {
   const bits: number[] = [];
   for (const ch of password) {
-    const code = ch.codePointAt(0)!;
+    let code = ch.codePointAt(0)!;
+    // Normalize katakana to hiragana
+    if (code >= CHAR_TABLE_START + KATAKANA_OFFSET && code <= CHAR_TABLE_END + KATAKANA_OFFSET) {
+      code -= KATAKANA_OFFSET;
+    }
     if (code < CHAR_TABLE_START || code > CHAR_TABLE_END) return null;
     const val = code - CHAR_TABLE_START;
     for (let b = 5; b >= 0; b--) {
@@ -460,11 +471,16 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-/** Validate whether all characters in the password are in the character table. */
+/** Validate whether all characters in the password are in the character table.
+ *  Accepts both hiragana (ぁ–む) and their katakana equivalents (ァ–ム). */
 export function isValidPassword(password: string): boolean {
   if (password.length !== PASSWORD_LENGTH) return false;
   for (const ch of password) {
-    const code = ch.codePointAt(0)!;
+    let code = ch.codePointAt(0)!;
+    // Normalize katakana to hiragana
+    if (code >= CHAR_TABLE_START + KATAKANA_OFFSET && code <= CHAR_TABLE_END + KATAKANA_OFFSET) {
+      code -= KATAKANA_OFFSET;
+    }
     if (code < CHAR_TABLE_START || code > CHAR_TABLE_END) return false;
   }
   return true;
