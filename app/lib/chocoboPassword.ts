@@ -96,15 +96,15 @@ export interface ChocoboParams {
   /** Total races entered */
   races: number;
   habits: ChocoboHabits;
-  dart: "" | "△" | "○" | "◎";
+  dart: "✕" | "△" | "○" | "◎";
   round: "なし" | "右" | "左" | "右左";
   temp: "なし" | "暑" | "寒" | "暑寒";
   kakari: "なし" | "あり";
   aori: "なし" | "あり";
   irekomi: "なし" | "あり";
   festival: number;
-  kisyo: "" | "○";
-  slot: "" | "○";
+  kisyo: "✕" | "○";
+  slot: "✕" | "○";
   a1: number;
   a2: number;
   a3: number;
@@ -181,7 +181,7 @@ const LIVE_FOREHEAD_COLORS: ForeheadColor[] = ["赤", "無", "虹"];
 const LIVE_EYE_COLORS: EyeColor[] = ["赤", "青", "緑"];
 const LIVE_BODY_SIZES: BodySize[] = ["低", "中", "高"];
 const LIVE_BODY_TYPES: BodyType[] = ["やせ", "普通", "デブ"];
-const LIVE_DARTS = ["", "△", "○", "◎"] as const;
+const LIVE_DARTS = ["✕", "△", "○", "◎"] as const;
 const LIVE_ROUNDS = ["なし", "右", "左", "右左"] as const;
 const LIVE_TEMPS = ["なし", "暑", "寒", "暑寒"] as const;
 
@@ -197,15 +197,15 @@ const NAME_CHARS: string[] = [
 ];
 
 export const WING_COLORS: WingColor[] = [
-  "黄色", "白", "水色", "青", "緑", "赤", "黒", "黄金",
+  "白", "黒", "黄金", "赤", "青", "緑", "黄色", "紫", "桃", "灰",
 ];
 
 export const FOREHEAD_COLORS: ForeheadColor[] = [
-  "黄色", "白", "水色", "青", "緑", "赤", "黒", "紫",
+  "赤", "無", "虹",
 ];
 
 export const EYE_COLORS: EyeColor[] = [
-  "黄", "赤", "青", "緑", "紫", "橙", "白", "黒",
+  "赤", "青", "緑",
 ];
 
 export const BODY_TYPES: BodyType[] = ["やせ", "普通", "デブ"];
@@ -455,15 +455,15 @@ export function decodePassword(password: string): ChocoboParams | null {
       ame: tempCode === 2 || tempCode === 3,
       omoba: false,
     },
-    dart: LIVE_DARTS[dartCode] ?? "",
+    dart: LIVE_DARTS[dartCode] ?? "✕",
     round: LIVE_ROUNDS[roundCode] ?? "なし",
     temp: LIVE_TEMPS[tempCode] ?? "なし",
     kakari: type26 === 1 ? "あり" : "なし",
     aori: type27 === 1 ? "あり" : "なし",
     irekomi: type28 === 1 ? "あり" : "なし",
     festival: matsuri,
-    kisyo: kisyoCode === 2 || kisyoCode === 3 ? "○" : "",
-    slot: slotCode === 1 ? "○" : "",
+    kisyo: kisyoCode === 2 || kisyoCode === 3 ? "○" : "✕",
+    slot: slotCode === 1 ? "○" : "✕",
     a1,
     a2,
     a3,
@@ -685,15 +685,15 @@ export function defaultParams(): ChocoboParams {
       ame: false,
       omoba: false,
     },
-    dart: "",
+    dart: "✕",
     round: "なし",
     temp: "なし",
     kakari: "なし",
     aori: "なし",
     irekomi: "なし",
     festival: 0,
-    kisyo: "",
-    slot: "",
+    kisyo: "✕",
+    slot: "✕",
     a1: 100,
     a2: 100,
     a3: 100,
