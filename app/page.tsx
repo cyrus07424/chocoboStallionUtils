@@ -113,21 +113,20 @@ function LabelWithHelp({label}: { label: string }) {
 
 interface AbilityRowProps {
     label: string;
-    labelJp: string;
     value: number | string;
     maxValue?: number;
     grade?: string;
     barMax?: number;
 }
 
-function AbilityRow({label, labelJp, value, maxValue, grade, barMax}: AbilityRowProps) {
+function AbilityRow({label, value, maxValue, grade, barMax}: AbilityRowProps) {
     const resolvedGrade =
         grade !== undefined ? grade : typeof value === "number" ? getAbilityGrade(value) : "";
     const gradeColor =
         resolvedGrade === "A" ? "text-red-600 font-bold" :
             resolvedGrade === "B" ? "text-orange-500 font-bold" :
                 resolvedGrade === "C" ? "text-blue-500" : "text-gray-500";
-    const tip = TOOLTIPS[labelJp];
+    const tip = TOOLTIPS[label];
     const numericValue = typeof value === "number" ? value : null;
     const barScaleMax = Math.max(1, barMax ?? maxValue ?? 255);
     const barRatio = numericValue !== null ? Math.max(0, Math.min(1, numericValue / barScaleMax)) : 0;
@@ -136,7 +135,7 @@ function AbilityRow({label, labelJp, value, maxValue, grade, barMax}: AbilityRow
         <tr className="border-b border-gray-100">
             <td className="py-1.5 text-sm font-medium text-gray-600 w-32">
         <span className="inline-flex items-center gap-1">
-          {labelJp}
+          {label}
             {tip && <HelpIconTooltip text={tip}/>}
         </span>
             </td>
@@ -165,12 +164,11 @@ function AbilityRow({label, labelJp, value, maxValue, grade, barMax}: AbilityRow
 
 interface AbilityInputProps {
     label: string;
-    labelJp: string;
     value: number;
     onChange: (v: number) => void;
 }
 
-function AbilityInput({label, labelJp, value, onChange}: AbilityInputProps) {
+function AbilityInput({label, value, onChange}: AbilityInputProps) {
     const grade = getAbilityGrade(value);
     const gradeColor =
         grade === "A" ? "text-red-600 font-bold" :
@@ -180,7 +178,7 @@ function AbilityInput({label, labelJp, value, onChange}: AbilityInputProps) {
     return (
         <div className="flex items-center gap-3">
             <label className="w-28 text-sm font-medium text-gray-700 shrink-0">
-                <LabelWithHelp label={labelJp}/>
+                <LabelWithHelp label={label}/>
             </label>
             <input
                 type="number"
@@ -397,31 +395,31 @@ function PasswordAnalyzer() {
                             </tr>
                             </thead>
                             <tbody>
-                            <AbilityRow label="senko" labelJp="先行力" value={abilities.senko}
+                            <AbilityRow label="先行力" value={abilities.senko}
                                         maxValue={calcMaxAbility(abilities.senko, "senko")}/>
-                            <AbilityRow label="chokyo" labelJp="長距離" value={abilities.chokyo}
+                            <AbilityRow label="長距離" value={abilities.chokyo}
                                         maxValue={calcMaxAbility(abilities.chokyo, "chokyo")}/>
-                            <AbilityRow label="shunpatsu" labelJp="瞬発力" value={abilities.shunpatsu}
+                            <AbilityRow label="瞬発力" value={abilities.shunpatsu}
                                         maxValue={calcMaxAbility(abilities.shunpatsu, "shunpatsu")}/>
-                            <AbilityRow label="jizoku" labelJp="持続力" value={abilities.jizoku}
+                            <AbilityRow label="持続力" value={abilities.jizoku}
                                         maxValue={calcMaxAbility(abilities.jizoku, "jizoku")}/>
-                            <AbilityRow label="sokojikara" labelJp="底力" value={abilities.sokojikara}
+                            <AbilityRow label="底力" value={abilities.sokojikara}
                                         maxValue={calcMaxAbility(abilities.sokojikara, "sokojikara")}/>
-                            <AbilityRow label="jizaisei" labelJp="自在性" value={abilities.jizaisei}
+                            <AbilityRow label="自在性" value={abilities.jizaisei}
                                         maxValue={calcMaxAbility(abilities.jizaisei, "jizaisei")}/>
-                            <AbilityRow label="kasoku" labelJp="加速力" value={abilities.kasoku}
+                            <AbilityRow label="加速力" value={abilities.kasoku}
                                         maxValue={calcMaxAbility(abilities.kasoku, "kasoku")}/>
-                            <AbilityRow label="hp" labelJp="HP" value={abilities.hp} grade=""/>
-                            <AbilityRow label="omatsuri" labelJp="お祭り好き" value={result.festival} grade="" barMax={15}/>
-                            <AbilityRow label="a1" labelJp="Ａ１" value={result.a1} grade=""/>
-                            <AbilityRow label="a2" labelJp="Ａ２" value={result.a2} grade=""/>
-                            <AbilityRow label="a3" labelJp="Ａ３" value={result.a3} grade=""/>
-                            <AbilityRow label="a4" labelJp="Ａ４" value={result.a4} grade=""/>
-                            <AbilityRow label="a5" labelJp="Ａ５" value={result.a5} grade=""/>
-                            <AbilityRow label="senJizai" labelJp="先自" value={result.senJizai} grade=""/>
-                            <AbilityRow label="senShun" labelJp="先瞬" value={result.senShun} grade=""/>
-                            <AbilityRow label="shunKa" labelJp="瞬加" value={result.shunKa} grade=""/>
-                            <AbilityRow label="senKa" labelJp="先加" value={result.senKa} grade=""/>
+                            <AbilityRow label="HP" value={abilities.hp} grade=""/>
+                            <AbilityRow label="お祭り好き" value={result.festival} grade="" barMax={15}/>
+                            <AbilityRow label="Ａ１" value={result.a1} grade=""/>
+                            <AbilityRow label="Ａ２" value={result.a2} grade=""/>
+                            <AbilityRow label="Ａ３" value={result.a3} grade=""/>
+                            <AbilityRow label="Ａ４" value={result.a4} grade=""/>
+                            <AbilityRow label="Ａ５" value={result.a5} grade=""/>
+                            <AbilityRow label="先自" value={result.senJizai} grade=""/>
+                            <AbilityRow label="先瞬" value={result.senShun} grade=""/>
+                            <AbilityRow label="瞬加" value={result.shunKa} grade=""/>
+                            <AbilityRow label="先加" value={result.senKa} grade=""/>
                             </tbody>
                         </table>
                         <p className="text-xs text-gray-400 mt-2">
@@ -702,21 +700,21 @@ function PasswordGenerator() {
             <section className="bg-white rounded-lg border border-gray-200 p-4">
                 <h3 className="font-semibold text-gray-800 mb-4">能力値 (0–255)</h3>
                 <div className="space-y-2">
-                    <AbilityInput label="senko" labelJp="先行力" value={abilities.senko}
+                    <AbilityInput label="先行力" value={abilities.senko}
                                   onChange={(v) => setAbility("senko", v)}/>
-                    <AbilityInput label="chokyo" labelJp="長距離" value={abilities.chokyo}
+                    <AbilityInput label="長距離" value={abilities.chokyo}
                                   onChange={(v) => setAbility("chokyo", v)}/>
-                    <AbilityInput label="shunpatsu" labelJp="瞬発力" value={abilities.shunpatsu}
+                    <AbilityInput label="瞬発力" value={abilities.shunpatsu}
                                   onChange={(v) => setAbility("shunpatsu", v)}/>
-                    <AbilityInput label="jizoku" labelJp="持続力" value={abilities.jizoku}
+                    <AbilityInput label="持続力" value={abilities.jizoku}
                                   onChange={(v) => setAbility("jizoku", v)}/>
-                    <AbilityInput label="sokojikara" labelJp="底力" value={abilities.sokojikara}
+                    <AbilityInput label="底力" value={abilities.sokojikara}
                                   onChange={(v) => setAbility("sokojikara", v)}/>
-                    <AbilityInput label="jizaisei" labelJp="自在性" value={abilities.jizaisei}
+                    <AbilityInput label="自在性" value={abilities.jizaisei}
                                   onChange={(v) => setAbility("jizaisei", v)}/>
-                    <AbilityInput label="kasoku" labelJp="加速力" value={abilities.kasoku}
+                    <AbilityInput label="加速力" value={abilities.kasoku}
                                   onChange={(v) => setAbility("kasoku", v)}/>
-                    <AbilityInput label="hp" labelJp="HP" value={abilities.hp} onChange={(v) => setAbility("hp", v)}/>
+                    <AbilityInput label="HP" value={abilities.hp} onChange={(v) => setAbility("hp", v)}/>
                 </div>
                 <div className="mt-3 text-xs text-gray-400">
                     評価基準: A=121以上, B=86～120, C=51～85, D=50以下

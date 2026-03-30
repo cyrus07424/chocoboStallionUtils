@@ -33,33 +33,23 @@ export interface ChocoboAbilities {
     hp: number;
 }
 
-export type WingColor = | "白色" | "黒色" | "金色" | "赤色" | "青色" | "緑色" | "黄色" | "紫色" | "桃色" | "灰色" | "水色";
+export type WingColor =
+    | "白色"
+    | "黒色"
+    | "金色"
+    | "赤色"
+    | "青色"
+    | "緑色"
+    | "黄色"
+    | "紫色"
+    | "桃色"
+    | "灰色"
+    | "水色";
 export type ForeheadColor = | "赤色" | "無" | "虹色";
 export type EyeColor = | "赤色" | "青色" | "緑色";
 export type BodyType = "やせ" | "普通" | "デブ";
 export type BodySize = "低" | "中" | "高";
 export type Gender = "♂" | "♀";
-
-export interface ChocoboHabits {
-    /** かかり癖 – tendency to charge/rush */
-    kakari: boolean;
-    /** 出遅れ癖 – tendency for slow start */
-    deokure: boolean;
-    /** お祭り好き – loves festivals / excitable */
-    omatsuri: boolean;
-    /** 左回り得意 – strong on left turns */
-    hidarimawari: boolean;
-    /** 右回り得意 – strong on right turns */
-    migimawari: boolean;
-    /** 外枠得意 – strong from outside gate */
-    sotowaku: boolean;
-    /** 内枠得意 – strong from inside gate */
-    uchiwaku: boolean;
-    /** 雨得意 – strong in rain */
-    ame: boolean;
-    /** 重馬場得意 – strong on heavy track */
-    omoba: boolean;
-}
 
 export interface ChocoboParams {
     abilities: ChocoboAbilities;
@@ -84,7 +74,6 @@ export interface ChocoboParams {
     wins: number;
     /** Total races entered */
     races: number;
-    habits: ChocoboHabits;
     dart: "✕" | "△" | "○" | "◎";
     round: "なし" | "右" | "左" | "右左";
     temp: "なし" | "暑" | "寒" | "暑寒";
@@ -123,11 +112,6 @@ const CHAR_TABLE_END = 0x3080;   // む
 
 /** Unicode offset from hiragana to the corresponding katakana character. */
 const KATAKANA_OFFSET = 0x60;
-
-export const CHAR_TABLE: string = Array.from(
-    {length: CHAR_TABLE_END - CHAR_TABLE_START + 1},
-    (_, i) => String.fromCodePoint(CHAR_TABLE_START + i)
-).join("");
 
 // decode_pass() の 0..127 対応表をそのまま移植
 const LIVE_PASSWORD_CHARS: string[] = [
@@ -174,17 +158,6 @@ const LIVE_DARTS = ["✕", "△", "○", "◎"] as const;
 const LIVE_ROUNDS = ["なし", "右", "左", "右左"] as const;
 const LIVE_TEMPS = ["なし", "暑", "寒", "暑寒"] as const;
 
-/** Name character table – same as the password table for name encoding */
-const NAME_CHARS: string[] = [
-    "ぁ", "あ", "ぃ", "い", "ぅ", "う", "ぇ", "え", "ぉ", "お",
-    "か", "が", "き", "ぎ", "く", "ぐ", "け", "げ", "こ", "ご",
-    "さ", "ざ", "し", "じ", "す", "ず", "せ", "ぜ", "そ", "ぞ",
-    "た", "だ", "ち", "ぢ", "っ", "つ", "づ", "て", "で", "と",
-    "ど", "な", "に", "ぬ", "ね", "の", "は", "ば", "ぱ", "ひ",
-    "び", "ぴ", "ふ", "ぶ", "ぷ", "へ", "べ", "ぺ", "ほ", "ぼ",
-    "ぽ", "ま", "み", "む",
-];
-
 export const WING_COLORS: WingColor[] = [
     "白色", "黒色", "金色", "赤色", "青色", "緑色", "黄色", "紫色", "桃色", "灰色",
 ];
@@ -200,140 +173,6 @@ export const EYE_COLORS: EyeColor[] = [
 export const BODY_TYPES: BodyType[] = ["やせ", "普通", "デブ"];
 export const BODY_SIZES: BodySize[] = ["低", "中", "高"];
 
-// ─────────────────────────────────────────────────────────────
-// Bit-stream helpers
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Convert a password string to an array of 204 bits (each 0 or 1).
- * Accepts both hiragana (ぁ–む, U+3041–U+3080) and their katakana equivalents
- * (ァ–ム, U+30A1–U+30E0). Returns null if the password contains invalid characters.
- */
-function passwordToBits(password: string): number[] | null {
-    const bits: number[] = [];
-    for (const ch of password) {
-        let code = ch.codePointAt(0)!;
-        // Normalize katakana to hiragana
-        if (code >= CHAR_TABLE_START + KATAKANA_OFFSET && code <= CHAR_TABLE_END + KATAKANA_OFFSET) {
-            code -= KATAKANA_OFFSET;
-        }
-        if (code < CHAR_TABLE_START || code > CHAR_TABLE_END) return null;
-        const val = code - CHAR_TABLE_START;
-        for (let b = 5; b >= 0; b--) {
-            bits.push((val >> b) & 1);
-        }
-    }
-    return bits;
-}
-
-/** Read `len` bits from the bit array starting at `offset` and return as an unsigned integer. */
-function readBits(bits: number[], offset: number, len: number): number {
-    let val = 0;
-    for (let i = 0; i < len; i++) {
-        val = (val << 1) | (bits[offset + i] ?? 0);
-    }
-    return val;
-}
-
-/** Write `len` bits of `value` into the bit array starting at `offset`. */
-function writeBits(bits: number[], offset: number, len: number, value: number): void {
-    for (let i = len - 1; i >= 0; i--) {
-        bits[offset + (len - 1 - i)] = (value >> i) & 1;
-    }
-}
-
-/** Convert a 204-bit array into a 34-character password string. */
-function bitsToPassword(bits: number[]): string {
-    let result = "";
-    for (let i = 0; i < PASSWORD_LENGTH; i++) {
-        let val = 0;
-        for (let b = 0; b < 6; b++) {
-            val = (val << 1) | (bits[i * 6 + b] ?? 0);
-        }
-        result += String.fromCodePoint(CHAR_TABLE_START + val);
-    }
-    return result;
-}
-
-// ─────────────────────────────────────────────────────────────
-// Bit-field layout
-//
-// Based on community reverse-engineering of the password format.
-// Total: 34 chars × 6 bits = 204 bits.
-//
-// Offset  Length  Field
-//  0       8      先行力 (senko)
-//  8       8      長距離 (chokyo)
-// 16       8      瞬発力 (shunpatsu)
-// 24       8      持続力 (jizoku)
-// 32       8      底力   (sokojikara)
-// 40       8      自在性 (jizaisei)
-// 48       8      加速力 (kasoku)
-// 56       8      HP
-// 64       1      性別   (gender) 0=♂ 1=♀
-// 65       3      羽色   (wingColor)
-// 68       3      額色   (foreheadColor)
-// 71       3      目の色  (eyeColor)
-// 74       2      体型   (bodyType)
-// 76       2      体格   (bodySize)
-// 78       4      年齢(年) (ageYear, stored as year-3)
-// 82       4      年齢(月) (ageMonth, stored as month-1)
-// 86       2      年齢(週) (ageWeek, stored as week-1)
-// 88       4      登録(月) (regMonth, stored as month-1)
-// 92       2      登録(週) (regWeek, stored as week-1)
-// 94       7      勝数   (wins)
-// 101      7      出走数  (races)
-// 108      1      かかり癖
-// 109      1      出遅れ癖
-// 110      1      お祭り好き
-// 111      1      左回り得意
-// 112      1      右回り得意
-// 113      1      外枠得意
-// 114      1      内枠得意
-// 115      1      晴れ得意
-// 116      1      雨得意
-// 117      1      重馬場得意
-// 118      30     名前 (name) – 5 chars × 6 bits (index into NAME_CHARS)
-// 148      56     padding / reserved
-//   (total 204 bits)
-// ─────────────────────────────────────────────────────────────
-
-const OFF = {
-    senko: 0,
-    chokyo: 8,
-    shunpatsu: 16,
-    jizoku: 24,
-    sokojikara: 32,
-    jizaisei: 40,
-    kasoku: 48,
-    hp: 56,
-    gender: 64,
-    wingColor: 65,
-    foreheadColor: 68,
-    eyeColor: 71,
-    bodyType: 74,
-    bodySize: 76,
-    ageYear: 78,
-    ageMonth: 82,
-    ageWeek: 86,
-    regMonth: 88,
-    regWeek: 92,
-    wins: 94,
-    races: 101,
-    kakari: 108,
-    deokure: 109,
-    omatsuri: 110,
-    hidari: 111,
-    migi: 112,
-    soto: 113,
-    uchi: 114,
-    ame: 116,
-    omoba: 117,
-    name: 118,  // 5 chars × 6 bits = 30 bits
-} as const;
-
-/** Maximum name length (characters) */
-const MAX_NAME_LENGTH = 5;
 
 // ─────────────────────────────────────────────────────────────
 // Public API
@@ -431,17 +270,6 @@ export function decodePassword(password: string): ChocoboParams | null {
         regWeek: ageWeek,
         wins,
         races,
-        habits: {
-            kakari: type26 === 1,
-            deokure: type27 === 1,
-            omatsuri: matsuri > 0,
-            hidarimawari: roundCode === 2 || roundCode === 3,
-            migimawari: roundCode === 1 || roundCode === 3,
-            sotowaku: false,
-            uchiwaku: false,
-            ame: tempCode === 2 || tempCode === 3,
-            omoba: false,
-        },
         dart: LIVE_DARTS[dartCode] ?? "✕",
         round: LIVE_ROUNDS[roundCode] ?? "なし",
         temp: LIVE_TEMPS[tempCode] ?? "なし",
@@ -660,17 +488,6 @@ export function defaultParams(): ChocoboParams {
         regWeek: 1,
         wins: 0,
         races: 0,
-        habits: {
-            kakari: false,
-            deokure: false,
-            omatsuri: false,
-            hidarimawari: false,
-            migimawari: false,
-            sotowaku: false,
-            uchiwaku: false,
-            ame: false,
-            omoba: false,
-        },
         dart: "✕",
         round: "なし",
         temp: "なし",
