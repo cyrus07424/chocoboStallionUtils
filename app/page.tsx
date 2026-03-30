@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
     ARI_NASHI_VALUES,
     BODY_SIZES,
@@ -176,9 +176,10 @@ interface AbilityInputProps {
     label: string;
     value: number;
     onChange: (v: number) => void;
+    showGrade?: boolean;
 }
 
-function AbilityInput({label, value, onChange}: AbilityInputProps) {
+function AbilityInput({label, value, onChange, showGrade = true}: AbilityInputProps) {
     const grade = getAbilityGrade(value);
     const gradeColor =
         grade === "A" ? "text-red-600 font-bold" :
@@ -198,7 +199,9 @@ function AbilityInput({label, value, onChange}: AbilityInputProps) {
                 onChange={(e) => onChange(Math.max(0, Math.min(255, Number(e.target.value) || 0)))}
                 className="w-20 px-2 py-1 border border-gray-300 rounded text-sm text-center font-mono"
             />
-            <span className={`text-sm w-4 ${gradeColor}`}>{grade}</span>
+            <span className={`text-sm w-4 ${showGrade ? gradeColor : "text-transparent"}`} aria-hidden={!showGrade}>
+                {showGrade ? grade : ""}
+            </span>
             <input
                 type="range"
                 min={0}
@@ -556,7 +559,6 @@ function RadarChart({
 
 function PasswordGenerator() {
     const [params, setParams] = useState<ChocoboParams>(defaultParams());
-    const [password, setPassword] = useState("");
     const [copied, setCopied] = useState(false);
 
     const normalizeKatakanaName = (value: string) => {
@@ -575,11 +577,11 @@ function PasswordGenerator() {
         return katakanaOnly.slice(0, 10);
     };
 
-    const generate = () => {
-        const pw = encodePassword(params);
-        setPassword(pw);
+    const password = encodePassword(params);
+
+    useEffect(() => {
         setCopied(false);
-    };
+    }, [params]);
 
     const copyToClipboard = () => {
         if (!password) return;
@@ -732,7 +734,8 @@ function PasswordGenerator() {
                                   onChange={(v) => setAbility("jizaisei", v)}/>
                     <AbilityInput label="加速力" value={abilities.kasoku}
                                   onChange={(v) => setAbility("kasoku", v)}/>
-                    <AbilityInput label="HP" value={abilities.hp} onChange={(v) => setAbility("hp", v)}/>
+                    <AbilityInput label="HP" value={abilities.hp} showGrade={false}
+                                  onChange={(v) => setAbility("hp", v)}/>
                 </div>
                 <div className="mt-3 text-xs text-gray-400">
                     評価基準: A=121以上, B=86～120, C=51～85, D=50以下
@@ -828,12 +831,6 @@ function PasswordGenerator() {
                 </div>
             </section>
 
-            <button
-                onClick={generate}
-                className="w-full py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-bold text-base transition-colors"
-            >
-                パスワードを生成する
-            </button>
 
             {password && (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
