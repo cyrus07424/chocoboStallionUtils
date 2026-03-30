@@ -5,25 +5,25 @@ import {
     ARI_NASHI_VALUES,
     BODY_SIZES,
     BODY_TYPES,
-    DART_VALUES,
     type BodySize,
     type BodyType,
     calcMaxAbility,
     type ChocoboAbilities,
     type ChocoboParams,
+    DART_VALUES,
     decodePassword,
     defaultParams,
-    GENDER_VALUES,
     encodePassword,
     EYE_COLORS,
     type EyeColor,
     FOREHEAD_COLORS,
     type ForeheadColor,
     type Gender,
+    GENDER_VALUES,
     getAbilityGrade,
     isValidPassword,
-    ROUND_VALUES,
     PASSWORD_LENGTH,
+    ROUND_VALUES,
     TEMP_VALUES,
     WING_COLORS,
     type WingColor,
@@ -450,7 +450,9 @@ function PasswordAnalyzer() {
                             <RadarChart metrics={radarMetrics} maxValue={radarMax}/>
                         </div>
                         <div className="mt-4 border border-gray-100 rounded-lg p-3 bg-gray-50">
-                            <div className="text-sm font-medium text-gray-700 mb-2">6軸（先行力 / 長距離 / 瞬発力 / 自在性 / 加速力 / A3）</div>
+                            <div className="text-sm font-medium text-gray-700 mb-2">6軸（先行力 / 長距離 / 瞬発力 / 自在性
+                                / 加速力 / A3）
+                            </div>
                             <RadarChart metrics={radarMetrics6} maxValue={radarMax6}/>
                         </div>
                     </div>
@@ -509,7 +511,8 @@ function RadarChart({
                     return (
                         <g key={m.label}>
                             <line x1={center} y1={center} x2={end.x} y2={end.y} stroke="#d1d5db" strokeWidth="1"/>
-                            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="middle" fontSize="11" fill="#374151">
+                            <text x={label.x} y={label.y} textAnchor="middle" dominantBaseline="middle" fontSize="11"
+                                  fill="#374151">
                                 {m.label}
                             </text>
                         </g>
@@ -664,7 +667,7 @@ function PasswordGenerator() {
                         onChange={(v) => setParams((p) => ({...p, eyeColor: v as EyeColor}))}
                     />
 
-                    <div className="hidden md:block" aria-hidden="true" />
+                    <div className="hidden md:block" aria-hidden="true"/>
 
                     <SelectField
                         label="体型"
@@ -686,7 +689,8 @@ function PasswordGenerator() {
                 <h3 className="font-semibold text-gray-800 mb-3">年齢・登録・戦績</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="年齢"/></label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp
+                            label="年齢"/></label>
                         <div className="grid grid-cols-3 gap-2">
                             <NumberField label="歳" value={params.ageYear} min={3} max={18}
                                          onChange={(v) => setParams((p) => ({...p, ageYear: v}))}/>
@@ -697,7 +701,8 @@ function PasswordGenerator() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="登録"/></label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp
+                            label="登録"/></label>
                         <div className="grid grid-cols-2 gap-2">
                             <NumberField label="月" value={params.regMonth} min={1} max={12}
                                          onChange={(v) => setParams((p) => ({...p, regMonth: v}))}/>
@@ -706,7 +711,8 @@ function PasswordGenerator() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="戦績"/></label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp
+                            label="戦績"/></label>
                         <div className="grid grid-cols-2 gap-2">
                             <NumberField label="勝" value={params.wins} min={0} max={127}
                                          onChange={(v) => setParams((p) => ({...p, wins: v}))}/>
@@ -803,7 +809,7 @@ function PasswordGenerator() {
                         options={toMappedOptions(ARI_NASHI_VALUES)}
                         onChange={(v) => setParams((p) => ({...p, irekomi: v as ChocoboParams["irekomi"]}))}
                     />
-                    <div className="hidden md:block" aria-hidden="true" />
+                    <div className="hidden md:block" aria-hidden="true"/>
                     <MappedSelectField
                         label="4-2気性"
                         value={params.kisyo}

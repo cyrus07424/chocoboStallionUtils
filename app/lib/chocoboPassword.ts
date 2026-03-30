@@ -51,6 +51,11 @@ export type EyeColor = typeof EYE_COLORS[number];
 export type BodyType = typeof BODY_TYPES[number];
 export type BodySize = typeof BODY_SIZES[number];
 export type Gender = typeof GENDER_VALUES[number];
+export type Dart = typeof DART_VALUES[number];
+export type Round = typeof ROUND_VALUES[number];
+export type Temp = typeof TEMP_VALUES[number];
+export type AriNashi = typeof ARI_NASHI_VALUES[number];
+export type XO = typeof XO_VALUES[number];
 
 export interface ChocoboParams {
     abilities: ChocoboAbilities;
@@ -75,15 +80,15 @@ export interface ChocoboParams {
     wins: number;
     /** Total races entered */
     races: number;
-    dart: typeof DART_VALUES[number];
-    round: typeof ROUND_VALUES[number];
-    temp: typeof TEMP_VALUES[number];
-    kakari: typeof ARI_NASHI_VALUES[number];
-    aori: typeof ARI_NASHI_VALUES[number];
-    irekomi: typeof ARI_NASHI_VALUES[number];
+    dart: Dart;
+    round: Round;
+    temp: Temp;
+    kakari: AriNashi;
+    aori: AriNashi;
+    irekomi: AriNashi;
     festival: number;
-    kisyo: typeof XO_VALUES[number];
-    slot: typeof XO_VALUES[number];
+    kisyo: XO;
+    slot: XO;
     a1: number;
     a2: number;
     a3: number;
@@ -93,8 +98,8 @@ export interface ChocoboParams {
     senShun: number;
     shunKa: number;
     senKa: number;
-    agari: typeof ARI_NASHI_VALUES[number];
-    cross: typeof ARI_NASHI_VALUES[number];
+    agari: AriNashi;
+    cross: AriNashi;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -114,8 +119,8 @@ const CHAR_TABLE_END = 0x3080;   // む
 /** Unicode offset from hiragana to the corresponding katakana character. */
 const KATAKANA_OFFSET = 0x60;
 
-// decode_pass() の 0..127 対応表をそのまま移植
-const LIVE_PASSWORD_CHARS: string[] = [
+// パスワードの文字とコードの対応表
+const PASSWORD_CHARS: string[] = [
     "ヅ", "デ", "ド", "ダ", "ヂ", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た",
     "ち", "つ", "て", "と", "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "ぁ", "ほ", "ま", "み",
     "む", "め", "も", "や", "ゆ", "よ", "ら", "り", "る", "れ", "ろ", "わ", "を", "バ", "が", "ぎ",
@@ -126,14 +131,14 @@ const LIVE_PASSWORD_CHARS: string[] = [
     "ロ", "ワ", "ヲ", "ン", "ヴ", "ガ", "ギ", "グ", "ゲ", "ゴ", "ッ", "ザ", "ジ", "ズ", "ゼ", "ゾ",
 ];
 
-const LIVE_PASSWORD_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
-    LIVE_PASSWORD_CHARS.reduce<Record<string, number>>((acc, ch, idx) => {
+const PASSWORD_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
+    PASSWORD_CHARS.reduce<Record<string, number>>((acc, ch, idx) => {
         acc[ch] = idx;
         return acc;
     }, {})
 );
 
-const LIVE_NAME_CODE_TO_CHAR: string[] = [
+const NAME_CODE_TO_CHAR: string[] = [
     "", "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス", "セ", "ソ",
     "タ", "チ", "ツ", "テ", "ト", "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ",
     "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ", "リ", "ル", "レ", "ロ", "ワ", "ヲ", "ン", "ヴ",
@@ -142,14 +147,14 @@ const LIVE_NAME_CODE_TO_CHAR: string[] = [
     "ュ", "ョ", "ー", "０", "１", "２", "３", "４", "５", "６", "７", "８", "９",
 ];
 
-const LIVE_NAME_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
-    LIVE_NAME_CODE_TO_CHAR.reduce<Record<string, number>>((acc, ch, idx) => {
+const NAME_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
+    NAME_CODE_TO_CHAR.reduce<Record<string, number>>((acc, ch, idx) => {
         if (ch) acc[ch] = idx;
         return acc;
     }, {})
 );
 
-const LIVE_NAME_CODE_INDEXES = [26, 1, 24, 3, 15, 5, 20, 7, 17, 29] as const;
+const NAME_CODE_INDEXES = [26, 1, 24, 3, 15, 5, 20, 7, 17, 29] as const;
 
 
 // ─────────────────────────────────────────────────────────────
@@ -166,14 +171,14 @@ export function decodePassword(password: string): ChocoboParams | null {
 
     const code: number[] = [];
     for (const ch of normalized) {
-        const value = LIVE_PASSWORD_CHAR_TO_CODE[ch];
+        const value = PASSWORD_CHAR_TO_CODE[ch];
         if (value === undefined) return null;
         code.push(value);
     }
 
     let name = "";
-    for (const idx of LIVE_NAME_CODE_INDEXES) {
-        const ch = LIVE_NAME_CODE_TO_CHAR[code[idx] ?? -1];
+    for (const idx of NAME_CODE_INDEXES) {
+        const ch = NAME_CODE_TO_CHAR[code[idx] ?? -1];
         if (ch === undefined) return null;
         name += ch;
     }
@@ -235,7 +240,7 @@ export function decodePassword(password: string): ChocoboParams | null {
             hp,
         },
         name,
-        gender: genderCode === 1 ? "♀" : "♂",
+        gender: GENDER_VALUES[genderCode] ?? GENDER_VALUES[0],
         wingColor: WING_COLORS[wingColorCode] ?? WING_COLORS[0],
         foreheadColor: FOREHEAD_COLORS[foreheadColorCode] ?? FOREHEAD_COLORS[0],
         eyeColor: EYE_COLORS[eyeColorCode] ?? EYE_COLORS[0],
@@ -251,12 +256,12 @@ export function decodePassword(password: string): ChocoboParams | null {
         dart: DART_VALUES[dartCode] ?? DART_VALUES[0],
         round: ROUND_VALUES[roundCode] ?? ROUND_VALUES[0],
         temp: TEMP_VALUES[tempCode] ?? TEMP_VALUES[0],
-        kakari: type26 === 1 ? "あり" : "なし",
-        aori: type27 === 1 ? "あり" : "なし",
-        irekomi: type28 === 1 ? "あり" : "なし",
+        kakari: ARI_NASHI_VALUES[type26] ?? ARI_NASHI_VALUES[0],
+        aori: ARI_NASHI_VALUES[type27] ?? ARI_NASHI_VALUES[0],
+        irekomi: ARI_NASHI_VALUES[type28] ?? ARI_NASHI_VALUES[0],
         festival: matsuri,
         kisyo: kisyoCode === 2 || kisyoCode === 3 ? XO_VALUES[1] : XO_VALUES[0],
-        slot: slotCode === 1 ? XO_VALUES[1] : XO_VALUES[0],
+        slot: XO_VALUES[slotCode] ?? XO_VALUES[0],
         a1,
         a2,
         a3,
@@ -266,8 +271,8 @@ export function decodePassword(password: string): ChocoboParams | null {
         senShun,
         shunKa,
         senKa,
-        agari: agariCode === 1 ? "あり" : "なし",
-        cross: crossCode === 1 ? "あり" : "なし",
+        agari: ARI_NASHI_VALUES[agariCode] ?? ARI_NASHI_VALUES[0],
+        cross: ARI_NASHI_VALUES[crossCode] ?? ARI_NASHI_VALUES[0],
     };
 }
 
@@ -305,9 +310,9 @@ export function encodePassword(params: ChocoboParams): string {
     const hpLo = hp % 8;
 
     const type =
-        (params.kakari === "あり" ? 4 : 0) +
-        (params.aori === "あり" ? 2 : 0) +
-        (params.irekomi === "あり" ? 1 : 0);
+        (params.kakari === ARI_NASHI_VALUES[1] ? 4 : 0) +
+        (params.aori === ARI_NASHI_VALUES[1] ? 2 : 0) +
+        (params.irekomi === ARI_NASHI_VALUES[1] ? 1 : 0);
 
     code[19] = clamp(type, 0, 7) * 16 + senkoHi;
     code[6] = chokyoHi + senkoLo * 8;
@@ -316,7 +321,7 @@ export function encodePassword(params: ChocoboParams): string {
     code[23] = jizokuLo;
     code[10] = sokoHi + hpLo * 16;
 
-    const slotCode = params.slot === "○" ? 1 : 0;
+    const slotCode = XO_VALUES.indexOf(params.slot);
     code[11] = slotCode + sokoLo * 8;
 
     code[2] = jizaiHi;
@@ -327,7 +332,7 @@ export function encodePassword(params: ChocoboParams): string {
     const matsLow = Math.floor(festival / 2);
     const matsHi = festival % 2;
 
-    const genderCode = params.gender === "♀" ? 1 : 0;
+    const genderCode = GENDER_VALUES.indexOf(params.gender);
     const dartCode = DART_VALUES.indexOf(params.dart);
     code[16] = matsLow + genderCode * 8 + clamp(dartCode >= 0 ? dartCode : 0, 0, 3) * 16;
 
@@ -369,13 +374,13 @@ export function encodePassword(params: ChocoboParams): string {
         clamp(bodyTypeCode >= 0 ? bodyTypeCode : 0, 0, 2) * 16 +
         bodySizeLow * 64;
 
-    const crossCode = params.cross === "あり" ? 1 : 0;
-    const agariCode = params.agari === "あり" ? 1 : 0;
-    const kisyoCode = params.kisyo === "○" ? (agariCode === 1 ? 3 : 2) : agariCode;
+    const crossCode = ARI_NASHI_VALUES.indexOf(params.cross);
+    const agariCode = ARI_NASHI_VALUES.indexOf(params.agari);
+    const kisyoCode = params.kisyo === XO_VALUES[1] ? (agariCode === 1 ? 3 : 2) : agariCode;
     code[18] = clamp(kisyoCode, 0, 3) * 2 + crossCode;
 
     const nameChars = Array.from(params.name)
-        .slice(0, LIVE_NAME_CODE_INDEXES.length)
+        .slice(0, NAME_CODE_INDEXES.length)
         .map((ch) => {
             const cp = ch.codePointAt(0) ?? 0;
             if (cp >= CHAR_TABLE_START && cp <= CHAR_TABLE_END) {
@@ -383,15 +388,15 @@ export function encodePassword(params: ChocoboParams): string {
             }
             return ch;
         });
-    while (nameChars.length < LIVE_NAME_CODE_INDEXES.length) nameChars.push("");
+    while (nameChars.length < NAME_CODE_INDEXES.length) nameChars.push("");
 
-    for (let i = 0; i < LIVE_NAME_CODE_INDEXES.length; i++) {
-        const idx = LIVE_NAME_CODE_INDEXES[i];
+    for (let i = 0; i < NAME_CODE_INDEXES.length; i++) {
+        const idx = NAME_CODE_INDEXES[i];
         const ch = nameChars[i] ?? "";
-        code[idx] = LIVE_NAME_CHAR_TO_CODE[ch] ?? 0;
+        code[idx] = NAME_CHAR_TO_CODE[ch] ?? 0;
     }
 
-    return code.map((v) => LIVE_PASSWORD_CHARS[clamp(v, 0, 127)] ?? LIVE_PASSWORD_CHARS[0]).join("");
+    return code.map((v) => PASSWORD_CHARS[clamp(v, 0, 127)] ?? PASSWORD_CHARS[0]).join("");
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -434,7 +439,7 @@ export function isValidPassword(password: string): boolean {
     const normalized = password.replace(/[ 　]/g, "");
     if (normalized.length !== PASSWORD_LENGTH) return false;
     for (const ch of normalized) {
-        if (LIVE_PASSWORD_CHAR_TO_CODE[ch] === undefined) return false;
+        if (PASSWORD_CHAR_TO_CODE[ch] === undefined) return false;
     }
     return true;
 }
@@ -453,12 +458,12 @@ export function defaultParams(): ChocoboParams {
             hp: 100,
         },
         name: "チョコボ",
-        gender: "♂",
-        wingColor: "黄色",
-        foreheadColor: "赤色",
-        eyeColor: "赤色",
-        bodyType: "普通",
-        bodySize: "中",
+        gender: GENDER_VALUES[0],
+        wingColor: WING_COLORS[6],
+        foreheadColor: FOREHEAD_COLORS[1],
+        eyeColor: EYE_COLORS[1],
+        bodyType: BODY_TYPES[1],
+        bodySize: BODY_SIZES[1],
         ageYear: 3,
         ageMonth: 1,
         ageWeek: 1,
@@ -466,9 +471,9 @@ export function defaultParams(): ChocoboParams {
         regWeek: 1,
         wins: 0,
         races: 0,
-        dart: "✕",
-        round: "なし",
-        temp: "なし",
+        dart: DART_VALUES[0],
+        round: ARI_NASHI_VALUES[0],
+        temp: ARI_NASHI_VALUES[0],
         kakari: ARI_NASHI_VALUES[0],
         aori: ARI_NASHI_VALUES[0],
         irekomi: ARI_NASHI_VALUES[0],
