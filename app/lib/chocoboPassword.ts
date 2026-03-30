@@ -2,9 +2,9 @@
  * Chocobo Stallion Password Encoder/Decoder
  *
  * Based on community reverse-engineering of the PS1 game "チョコボスタリオン" (Chocobo Stallion).
- * The password system encodes chocobo data as 34 hiragana characters (6 bits per character = 204 bits total).
+ * The password system encodes chocobo data as 34 characters (7 bits per character = 238 bits total).
  *
- * Character table: hiragana range U+3041–U+3080 (ぁ to む), mapping index 0–63.
+ * Password character table: PASSWORD_CHARS (128 entries, index 0–127).
  * Bit layout derived from fan analysis of the game's password format.
  */
 
@@ -14,16 +14,27 @@
 
 export type AbilityGrade = "A" | "B" | "C" | "D";
 
+/** 羽色の選択肢（コード値 0–9 に対応） */
 export const WING_COLORS = ["白色", "黒色", "金色", "赤色", "青色", "緑色", "黄色", "紫色", "桃色", "灰色"] as const;
+/** 額色の選択肢（コード値 0–2 に対応） */
 export const FOREHEAD_COLORS = ["赤色", "無", "虹色"] as const;
+/** 目の色の選択肢（コード値 0–2 に対応） */
 export const EYE_COLORS = ["赤色", "青色", "緑色"] as const;
+/** 体型の選択肢（コード値 0–2：やせ / 普通 / デブ） */
 export const BODY_TYPES = ["やせ", "普通", "デブ"] as const;
+/** 体格（大きさ）の選択肢（コード値 0–2：低 / 中 / 高） */
 export const BODY_SIZES = ["低", "中", "高"] as const;
+/** 性別の選択肢（コード値 0–1：♂ / ♀） */
 export const GENDER_VALUES = ["♂", "♀"] as const;
+/** ダートの選択肢（コード値 0–3：✕ / △ / ○ / ◎） */
 export const DART_VALUES = ["✕", "△", "○", "◎"] as const;
+/** 周り（コース方向得意）の選択肢（コード値 0–3：なし / 右 / 左 / 右左） */
 export const ROUND_VALUES = ["なし", "右", "左", "右左"] as const;
+/** 気温（得意気候）の選択肢（コード値 0–3：なし / 暑 / 寒 / 暑寒） */
 export const TEMP_VALUES = ["なし", "暑", "寒", "暑寒"] as const;
+/** あり／なしの選択肢（コード値 0–1） */
 export const ARI_NASHI_VALUES = ["なし", "あり"] as const;
+/** ✕／○ の選択肢（コード値 0–1） */
 export const XO_VALUES = ["✕", "○"] as const;
 
 export interface ChocoboAbilities {
@@ -86,19 +97,33 @@ export interface ChocoboParams {
     kakari: AriNashi;
     aori: AriNashi;
     irekomi: AriNashi;
+    /** 祭 – お祭りイベント回数 (0–15) */
     festival: number;
+    /** 気性 – 気性難の有無 */
     kisyo: XO;
+    /** スロット – スロット補正の有無 */
     slot: XO;
+    /** A1 – 7能力値（HP除く）の平均 */
     a1: number;
+    /** A2 – 8能力値（HP含む）の平均 */
     a2: number;
+    /** A3 – 先行力・瞬発力・加速力の平均 */
     a3: number;
+    /** A4 – 先行力・瞬発力・自在性・加速力の平均 */
     a4: number;
+    /** A5 – 先行力・長距離・瞬発力・自在性・加速力の平均 */
     a5: number;
+    /** 先自 – 先行力と自在性の平均 */
     senJizai: number;
+    /** 先瞬 – 先行力と瞬発力の平均 */
     senShun: number;
+    /** 瞬加 – 瞬発力と加速力の平均 */
     shunKa: number;
+    /** 先加 – 先行力と加速力の平均 */
     senKa: number;
+    /** あがり症 – あがり症の有無 */
     agari: AriNashi;
+    /** クロス病 – クロス病の有無 */
     cross: AriNashi;
 }
 
@@ -110,16 +135,19 @@ export interface ChocoboParams {
 export const PASSWORD_LENGTH = 34;
 
 /**
- * 旧エンコード処理で使用している64文字テーブル。
- * デコードは別の128コード表を利用する。
+ * 羽名エンコード時に、ひらがな（ぁ–む）をカタカナへ変換するための範囲定数。
+ * KATAKANA_OFFSET を加算することで対応するカタカナのコードポイントに変換する。
  */
-const CHAR_TABLE_START = 0x3041; // ぁ
-const CHAR_TABLE_END = 0x3080;   // む
+const CHAR_TABLE_START = 0x3041; // ぁ (U+3041)
+const CHAR_TABLE_END = 0x3080;   // む (U+3080)
 
 /** Unicode offset from hiragana to the corresponding katakana character. */
 const KATAKANA_OFFSET = 0x60;
 
-// パスワードの文字とコードの対応表
+/**
+ * パスワードの文字コードテーブル（128エントリ、インデックス 0–127）。
+ * パスワードの各文字はこの配列のインデックスとして 7 ビットで表現される。
+ */
 const PASSWORD_CHARS: string[] = [
     "ヅ", "デ", "ド", "ダ", "ヂ", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た",
     "ち", "つ", "て", "と", "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "ぁ", "ほ", "ま", "み",
@@ -131,6 +159,7 @@ const PASSWORD_CHARS: string[] = [
     "ロ", "ワ", "ヲ", "ン", "ヴ", "ガ", "ギ", "グ", "ゲ", "ゴ", "ッ", "ザ", "ジ", "ズ", "ゼ", "ゾ",
 ];
 
+/** PASSWORD_CHARS の逆引きマップ（文字 → インデックス）。デコード時の O(1) 検索用。 */
 const PASSWORD_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
     PASSWORD_CHARS.reduce<Record<string, number>>((acc, ch, idx) => {
         acc[ch] = idx;
@@ -138,6 +167,10 @@ const PASSWORD_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
     }, {})
 );
 
+/**
+ * 名前コード（0–93）に対応するカタカナ文字テーブル。
+ * インデックス 0 は空文字（名前終端・未使用スロット）を表す。
+ */
 const NAME_CODE_TO_CHAR: string[] = [
     "", "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", "サ", "シ", "ス", "セ", "ソ",
     "タ", "チ", "ツ", "テ", "ト", "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", "マ",
@@ -147,6 +180,7 @@ const NAME_CODE_TO_CHAR: string[] = [
     "ュ", "ョ", "ー", "０", "１", "２", "３", "４", "５", "６", "７", "８", "９",
 ];
 
+/** NAME_CODE_TO_CHAR の逆引きマップ（カタカナ文字 → コード番号）。エンコード時の O(1) 検索用。 */
 const NAME_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
     NAME_CODE_TO_CHAR.reduce<Record<string, number>>((acc, ch, idx) => {
         if (ch) acc[ch] = idx;
@@ -154,6 +188,10 @@ const NAME_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
     }, {})
 );
 
+/**
+ * パスワード配列（34文字）の中で、名前の各文字データが格納されているインデックス位置。
+ * 先頭から順に 10 文字分の名前に対応する（NAME_CODE_TO_CHAR でデコード）。
+ */
 const NAME_CODE_INDEXES = [26, 1, 24, 3, 15, 5, 20, 7, 17, 29] as const;
 
 
