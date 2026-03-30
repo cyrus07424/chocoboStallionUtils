@@ -22,6 +22,7 @@ import {
     GENDER_VALUES,
     getAbilityGrade,
     isValidPassword,
+    NAME_MAX_LENGTH,
     PASSWORD_LENGTH,
     ROUND_VALUES,
     TEMP_VALUES,
@@ -63,7 +64,7 @@ const TOOLTIPS: Record<string, string> = {
     "かかり癖": "レース道中に上体を反らして加速することがある（エビぞり）。気性難由来の特性。",
     "あおり癖": "出遅れ癖。スタートで出遅れることがある。出遅れ暴走が発生すると長瞬持自加に大幅ボーナスがつく場合もある。",
     "いれこみ癖": "タイムが遅くなることがある（バテやすくなる可能性）。気性難由来の特性。",
-    "羽名": "チョコボの名前。最大10文字（カタカナ）。",
+    "羽名": `チョコボの名前。最大${NAME_MAX_LENGTH}文字（カタカナ）。`,
     "性別": "チョコボの性別。雄(♂)・雌(♀)のいずれか。",
     "羽色": "羽の色。白色・黒色・金色・赤色・青色・緑色・黄色・紫色・桃色・灰色の10種類。",
     "額色": "額の羽の有無・色。赤色・無・虹色のいずれか。",
@@ -334,7 +335,7 @@ function PasswordAnalyzer() {
                             setInput(e.target.value);
                             setError("");
                         }}
-                        placeholder="34文字のパスワードを入力"
+                        placeholder={`${PASSWORD_LENGTH}文字のパスワードを入力`}
                         maxLength={PASSWORD_LENGTH}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     />
@@ -348,7 +349,7 @@ function PasswordAnalyzer() {
                         onClick={pasteAndAnalyze}
                         className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md text-sm font-semibold transition-colors"
                     >
-                        貼付け解析
+                        貼り付け
                     </button>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
@@ -383,7 +384,7 @@ function PasswordAnalyzer() {
                                 label="戦績"
                                 value={`${result.wins}勝 / ${result.races}戦`}
                             />
-                            <InfoItem label="ダート" value={result.dart || "なし"}/>
+                            <InfoItem label="ダート" value={result.dart}/>
                             <InfoItem label="周り" value={result.round}/>
                             <InfoItem label="気温" value={result.temp}/>
                             <InfoItem label="かかり癖" value={result.kakari}/>
@@ -577,7 +578,7 @@ function PasswordGenerator() {
             .filter((ch) => /[ァ-ヶー]/.test(ch))
             .join("");
 
-        return katakanaOnly.slice(0, 10);
+        return katakanaOnly.slice(0, NAME_MAX_LENGTH);
     };
 
     const password = encodePassword(params);
@@ -627,14 +628,15 @@ function PasswordGenerator() {
                 <h3 className="font-semibold text-gray-800 mb-4">基本情報</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="羽名"/>（最大10文字）</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp
+                            label="羽名"/>（最大{NAME_MAX_LENGTH}文字）</label>
                         <input
                             type="text"
                             value={params.name}
-                            maxLength={10}
+                            maxLength={NAME_MAX_LENGTH}
                             inputMode="text"
                             onChange={(e) => setParams((p) => ({...p, name: normalizeKatakanaName(e.target.value)}))}
-                            placeholder="カタカナ10文字以内"
+                            placeholder={`カタカナ${NAME_MAX_LENGTH}文字以内`}
                             className="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
                         />
                     </div>

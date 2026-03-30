@@ -134,6 +134,9 @@ export interface ChocoboParams {
 /** Password length (characters) */
 export const PASSWORD_LENGTH = 34;
 
+/** 羽名の最大文字数（カタカナ）。NAME_CODE_INDEXES の要素数と一致する。 */
+export const NAME_MAX_LENGTH = 10;
+
 /**
  * 羽名エンコード時に、ひらがな（ぁ–む）をカタカナへ変換するための範囲定数。
  * KATAKANA_OFFSET を加算することで対応するカタカナのコードポイントに変換する。
@@ -190,7 +193,7 @@ const NAME_CHAR_TO_CODE: Readonly<Record<string, number>> = Object.freeze(
 
 /**
  * パスワード配列（34文字）の中で、名前の各文字データが格納されているインデックス位置。
- * 先頭から順に 10 文字分の名前に対応する（NAME_CODE_TO_CHAR でデコード）。
+ * NAME_MAX_LENGTH (10) 文字分の名前に対応する（NAME_CODE_TO_CHAR でデコード）。
  */
 const NAME_CODE_INDEXES = [26, 1, 24, 3, 15, 5, 20, 7, 17, 29] as const;
 
