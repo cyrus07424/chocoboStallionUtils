@@ -49,7 +49,7 @@ const TOOLTIPS: Record<string, string> = {
     "先瞬": "先行と瞬発の平均値。",
     "瞬加": "瞬発と加速の平均値。",
     "先加": "先行と加速の平均値。",
-    "あがり症": "4-2気性のうちみ系・ふ系（*1）のチョコボで発症する可能性がある特性。レース中タイムが遅くなることがある。",
+    "あがり症": "4-2気性のうちみ系・ふ系のチョコボで発症する可能性がある特性。レース中タイムが遅くなることがある。",
     "クロス病": "インブリード（近親配合）が影響し発症する可能性がある特性。タイムが遅くなることがある。",
     "ダート": "ダートコースへの適性。✕＜△＜○＜◎の順で得意。",
     "周り": "得意なコースの回り方。右・左・右左・なしのいずれか。",
@@ -58,10 +58,10 @@ const TOOLTIPS: Record<string, string> = {
     "あおり癖": "出遅れ癖。スタートで出遅れることがある。出遅れ暴走が発生すると長瞬持自加に大幅ボーナスがつく場合もある。",
     "いれこみ癖": "タイムが遅くなることがある（バテやすくなる可能性）。気性難由来の特性。",
     "羽名": "チョコボの名前。最大10文字（カタカナ）。",
-    "性別": "チョコボの性別。雄・雌のいずれか。",
-    "羽色": "羽の色。白・黒・金・赤・青・緑・黄・紫・桃・灰の10種類。",
-    "額色": "額の羽の有無・色。赤・無・虹のいずれか。",
-    "目の色": "瞳の色。赤・青・緑の3種類。",
+    "性別": "チョコボの性別。雄(♂)・雌(♀)のいずれか。",
+    "羽色": "羽の色。白色・黒色・金色・赤色・青色・緑色・黄色・紫色・桃色・灰色の10種類。",
+    "額色": "額の羽の有無・色。赤色・無・虹色のいずれか。",
+    "目の色": "瞳の色。赤色・青色・緑色の3種類。",
     "体型": "横方向の体型。やせ・普通・デブのいずれか。",
     "体格": "縦方向の体格。低・中・高のいずれか。",
     "年齢": "チョコボの年齢。3歳1月1週が調教前の最も若い状態。",
@@ -91,6 +91,21 @@ function HelpIconTooltip({text}: { text: string }) {
         ?
       </span>
         </Tooltip>
+    );
+}
+
+function getTooltipText(label: string): string | undefined {
+    if (label === "4-2気性") return TOOLTIPS["4-2気性"];
+    return TOOLTIPS[label];
+}
+
+function LabelWithHelp({label}: { label: string }) {
+    const tip = getTooltipText(label);
+    return (
+        <span className="inline-flex items-center gap-1">
+            {label}
+            {tip && <HelpIconTooltip text={tip}/>}
+        </span>
     );
 }
 
@@ -165,7 +180,7 @@ function AbilityInput({label, labelJp, value, onChange}: AbilityInputProps) {
     return (
         <div className="flex items-center gap-3">
             <label className="w-28 text-sm font-medium text-gray-700 shrink-0">
-                {labelJp}
+                <LabelWithHelp label={labelJp}/>
             </label>
             <input
                 type="number"
@@ -593,7 +608,7 @@ function PasswordGenerator() {
                 <h3 className="font-semibold text-gray-800 mb-4">基本情報</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">羽名（最大10文字）</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="羽名"/>（最大10文字）</label>
                         <input
                             type="text"
                             value={params.name}
@@ -605,22 +620,12 @@ function PasswordGenerator() {
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">性別</label>
-                        <div className="flex gap-4">
-                            {(["雄", "雌"] as Gender[]).map((g) => (
-                                <label key={g} className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        checked={params.gender === g}
-                                        onChange={() => setParams((p) => ({...p, gender: g}))}
-                                        className="accent-yellow-500"
-                                    />
-                                    {g}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
+                    <SelectField
+                        label="性別"
+                        value={params.gender}
+                        options={["♂", "♀"]}
+                        onChange={(v) => setParams((p) => ({...p, gender: v as Gender}))}
+                    />
 
                     <SelectField
                         label="羽色"
@@ -663,7 +668,7 @@ function PasswordGenerator() {
                 <h3 className="font-semibold text-gray-800 mb-3">年齢・登録・戦績</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">年齢</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="年齢"/></label>
                         <div className="grid grid-cols-3 gap-2">
                             <NumberField label="年" value={params.ageYear} min={3} max={18}
                                          onChange={(v) => setParams((p) => ({...p, ageYear: v}))}/>
@@ -674,7 +679,7 @@ function PasswordGenerator() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">登録</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="登録"/></label>
                         <div className="grid grid-cols-2 gap-2">
                             <NumberField label="月" value={params.regMonth} min={1} max={12}
                                          onChange={(v) => setParams((p) => ({...p, regMonth: v}))}/>
@@ -683,7 +688,7 @@ function PasswordGenerator() {
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">戦績</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label="戦績"/></label>
                         <div className="grid grid-cols-2 gap-2">
                             <NumberField label="勝" value={params.wins} min={0} max={127}
                                          onChange={(v) => setParams((p) => ({...p, wins: v}))}/>
@@ -740,7 +745,7 @@ function PasswordGenerator() {
                         label="ダート"
                         value={params.dart}
                         options={[
-                            {label: "×", value: "×"},
+                            {label: "✕", value: "✕"},
                             {label: "△", value: "△"},
                             {label: "○", value: "○"},
                             {label: "◎", value: "◎"},
@@ -877,14 +882,10 @@ function PasswordGenerator() {
 // Helper components
 
 function InfoItem({label, value}: { label: string; value: string }) {
-    const tip = TOOLTIPS[label];
     return (
         <div>
       <span className="text-xs text-gray-500">
-        <span className="inline-flex items-center gap-1">
-          {label}
-            {tip && <HelpIconTooltip text={tip}/>}
-        </span>
+        <LabelWithHelp label={label}/>
       </span>
             <div className="font-medium text-gray-800 text-sm">{value}</div>
         </div>
@@ -905,7 +906,7 @@ function MappedSelectField({
 }) {
     return (
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label={label}/></label>
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -934,7 +935,7 @@ function SelectField({
 }) {
     return (
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label={label}/></label>
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -965,7 +966,7 @@ function NumberField({
 }) {
     return (
         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1"><LabelWithHelp label={label}/></label>
             <input
                 type="number"
                 value={value}
